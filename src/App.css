@@ -9,7 +9,11 @@
 .boards-container{
 height: auto;
 }
+
 .lists-container{
+    width:100%;
+    /* border:1px solid black; */
     overflow-x: scroll;
-    min-height: calc(100vh - 70px);
+    height: calc(100vh - 20vh);
+    overflow-y: auto;
 }

@@ -15,8 +15,9 @@ const apiToken = import.meta.env.VITE_API_TOKEN;
 async function getAllBoards(setBoards) {
   try {
     const response = await axios.get(
-      `https://api.trello.com/1/members/me/boards?fields=name,url&key=${apiKey}&token=${apiToken}`
+      `https://api.trello.com/1/members/me/boards?&key=${apiKey}&token=${apiToken}`
     );
+    // console.log('Boards',response.data);
     setBoards(response.data);
   } catch (error) {
     console.log("Error: ", error);

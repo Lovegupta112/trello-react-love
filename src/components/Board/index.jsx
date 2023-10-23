@@ -3,30 +3,27 @@ import {
   Card,
   CardContent,
   CardMedia,
-  CardActionArea,
   Typography,
 } from "@mui/material";
 
-const randomThings = [ "nature", "sea", "buildings", "weather"];
-const randomThing =
-  randomThings[Math.floor(Math.random() * randomThings.length)];
 
 const index = ({ board }) => {
   // console.log({ board });
-  const {name,id}=board;
+  const {name,id,prefs:{backgroundImageScaled,backgroundColor}}=board;
+  console.log(backgroundImageScaled);
   return (
-    <Card sx={{ width: "300px", backgroundColor: "", boxShadow: 2 }} id={id} className="board"> 
-      <CardActionArea>
-        <CardContent>
-          <Typography variant="h5">{name}</Typography>
-        </CardContent>
-        <CardMedia
+    <Card sx={{ width: "300px", backgroundColor: "", boxShadow: 2,cursor:'pointer'}} id={id} className="board"> 
+       
+        {backgroundImageScaled ?  <CardMedia
           component="img"
-          src={`https://source.unsplash.com/random/${randomThing}`}
+          src={backgroundImageScaled[1].url}
           height="140"
           alt="board-image"
-        />
-      </CardActionArea>
+          />:
+         <CardMedia sx={{height:'140px',backgroundColor}} component='section'/>}
+          <CardContent>
+          <Typography variant="h5">{name}</Typography>
+        </CardContent>
     </Card>
   );
 };

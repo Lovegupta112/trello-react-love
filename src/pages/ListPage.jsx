@@ -29,13 +29,13 @@ async function getAllLists(id, setLists, setError) {
 }
 
 //for getting board info -----
-async function getBoardInfo(id, setBoardName) {
+async function getBoardInfo(id, setBoardInfo) {
   try {
     const response = await axios.get(
       `https://api.trello.com/1/boards/${id}?key=${apiKey}&token=${apiToken}`
     );
-    // console.log(response.data);
-    setBoardName(response.data.name);
+    console.log("GetBoardInfo: ", response.data);
+    setBoardInfo(response.data);
   } catch (error) {
     console.log("Error: ", error);
   }
@@ -86,7 +86,7 @@ const ListPage = () => {
   const [open, setOpen] = useState(false);
   const [listName, setListName] = useState("");
   const [isCreated, setIsCreated] = useState(false);
-  const [boardName, setBoardName] = useState("");
+  const [board, setBoardInfo] = useState("");
   const [isClosed, setIsClosed] = useState(false);
   const [listId, setListId] = useState("");
   const [error, setError] = useState(false);
@@ -95,7 +95,7 @@ const ListPage = () => {
 
   useEffect(() => {
     getAllLists(id, setLists, setError);
-    getBoardInfo(id, setBoardName);
+    getBoardInfo(id, setBoardInfo);
   }, []);
 
   // creating list if listname is exist ------
@@ -144,9 +144,24 @@ const ListPage = () => {
       </Box>
     );
   }
+
+  const { name, prefs } = board;
+  console.log(board);
+
   return (
-    <Box sx={{ padding: "1rem" }} onClick={(e) => handleClick(e)}>
-      <Stack direction="row" spacing={2}>
+    <Box
+      sx={{
+        paddingTop:'1rem',
+        backgroundColor:prefs?.backgroundColor,
+        backgroundImage: `url(${prefs?.backgroundImage})`,
+        backgroundPosition: "center",
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+      }}
+      onClick={(e) => handleClick(e)}
+
+    >
+      <Stack direction="row" spacing={2} padding={2}>
         <Button
           variant="contained"
           startIcon={<ArrowBackIcon />}
@@ -155,7 +170,7 @@ const ListPage = () => {
           Back
         </Button>
         <Button variant="contained" startIcon={<DashboardIcon />}>
-          {boardName}
+          {name}
         </Button>
       </Stack>
 
