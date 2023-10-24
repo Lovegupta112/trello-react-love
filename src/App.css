@@ -1,22 +1,22 @@
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-:root{
-    --midnight-blue:#2c3e50;
+:root {
+  --midnight-blue: #2c3e50;
+  --light-grey: #eeeeeede;
 }
-.boards-container{
-height: auto;
+.boards-container {
+  height: auto;
 }
 
-.lists-container{
-    width:100%;
-    /* border:1px solid black; */
-    overflow-x: scroll;
-    height:calc(100vh - 20vh);
- 
+.lists-container {
+  width: 100%;
+  /* border:1px solid black; */
+  overflow-x: scroll;
+  height: calc(100vh - 20vh);
 }
-.list ::-webkit-scrollbar{
-    display: none;
+.list ::-webkit-scrollbar {
+  display: none;
 }
