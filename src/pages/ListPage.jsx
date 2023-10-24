@@ -3,13 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import List from "../components/List";
-import AddList from "../components/List/AddList";
+import AddItem from "../components/common/AddItem";
 import AlertMessage from "../components/common/AlertMessage";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import DeleteList from "../components/List/DeleteList";
 // import AddIcon from "@mui/icons-material/Add";
-// import AddItem from '../components/common/AddItem';
+
 
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiToken = import.meta.env.VITE_API_TOKEN;
@@ -187,7 +187,7 @@ const ListPage = () => {
         {/* <AddItem open={open} setOpen={setOpen} setListName={setListName}/> */}
 
         {/* for adding new list  ------ */}
-        <AddList setListName={setListName} />
+        <AddItem setItemTitle={setListName} itemName='a List' btnText='Add List'/>
 
         {/* for showing delete list popup -------- */}
         <DeleteList open={open} setOpen={setOpen} setIsClosed={setIsClosed} />

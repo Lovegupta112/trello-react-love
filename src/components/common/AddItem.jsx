@@ -1,34 +1,53 @@
-import React , {useState} from 'react';
-import {Box,Dialog,DialogTitle,DialogContent,DialogContentText,DialogActions, TextField,Button} from '@mui/material';
+import React ,{useState} from 'react';
+import {Box,Button, Accordion,AccordionDetails,AccordionSummary,Typography,TextField } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import AddIcon from "@mui/icons-material/Add";
 
-const AddItem = ({open,setOpen,setListName}) => {
 
+const AddItem = ({setItemTitle,itemName,btnText}) => {
+
+    const [expanded,setExpanded]=useState(false);
     const [name,setName]=useState('');
 
-    function handleClose(){
-     setOpen(false);
+   const handleChange=(panel)=>(event,isExpanded)=>{
+    setExpanded(isExpanded ? panel : false);
     }
 
-    function handleCreate(){
-        setListName(name);
-        setOpen(false);
-        setName('');
-    }
+
+    function handleClose(){
+        // setOpen(false);
+        setExpanded(false);
+       }
+   
+       function handleCreate(){
+           setItemTitle(name);
+        console.log(name);
+        if(name){
+            setExpanded(false);
+            setName('');
+        }
+       }
 
   return (
     <Box>
-        <Dialog open={open} onClose={handleClose}>
-            <DialogContent sx={{margin:'0.3rem'}}>
-                <DialogContentText sx={{margin:'0.3rem'}}>List Title</DialogContentText>
-                <TextField label='Enter List Title' autoFocus value={name} margin='dense'  onChange={(e)=>setName(e.target.value)}/>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={handleCreate} variant='contained'>Add List</Button>
-                <Button onClick={handleClose}>X</Button>
-            </DialogActions>
-        </Dialog>
+        <Accordion expanded={expanded==='panel1'} onChange={handleChange('panel1')} >
+           <AccordionSummary  aria-controls="panel1a-content"
+          id="panel1a-header" >
+            {/* <Typography>hello</Typography> */}
+            <Button  startIcon={<AddIcon />} sx={{width:250,height:'fit-content',wordBreak:'break-word'}} >{expanded ? `Enter ${itemName} Title`:`Add  ${itemName}`}</Button>
+      
+          </AccordionSummary>
+          <AccordionDetails>
+          <TextField autoFocus value={name} margin='dense'  onChange={(e)=>setName(e.target.value)}/>
+          <Box  padding={2} >
+          <Button onClick={handleCreate} variant='contained'>{btnText}</Button>
+          <Button onClick={handleClose}>X</Button>
+          </Box>
+          </AccordionDetails>
+        </Accordion>
+        
     </Box>
   )
 }
 
-export default AddItem;
+export default AddItem
