@@ -7,7 +7,7 @@ import AddItem from "../components/common/AddItem";
 import AlertMessage from "../components/common/AlertMessage";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import DeleteList from "../components/List/DeleteList";
+import DeleteItem from "../components/common/DeleteItem";
 // import AddIcon from "@mui/icons-material/Add";
 
 
@@ -34,7 +34,7 @@ async function getBoardInfo(id, setBoardInfo) {
     const response = await axios.get(
       `https://api.trello.com/1/boards/${id}?key=${apiKey}&token=${apiToken}`
     );
-    console.log("GetBoardInfo: ", response.data);
+    // console.log("GetBoardInfo: ", response.data);
     setBoardInfo(response.data);
   } catch (error) {
     console.log("Error: ", error);
@@ -64,14 +64,13 @@ async function createList(
 }
 
 // for deleting/archive list ----
-// working on it ----------
 async function deleteList(listId, setListId, lists, setLists, setIsClosed) {
   try {
     const response = await axios.put(
-      `https://api.trello.com/1/lists/${listId}/closed?key=${apiKey}&token=${apiToken}`
+      `https://api.trello.com/1/lists/${listId}/closed?key=${apiKey}&token=${apiToken}&value=true`
     );
-    console.log("Deleted List: ", response.data);
-    setLists(lists.filter((list) => list.id !== id));
+    // console.log("Deleted List: ", response.data);
+    setLists(lists.filter((list) => list.id !== listId));
     setIsClosed(true);
     setListId("");
   } catch (error) {
@@ -146,7 +145,7 @@ const ListPage = () => {
   }
 
   const { name, prefs } = board;
-  console.log(board);
+
 
   return (
     <Box
@@ -183,14 +182,12 @@ const ListPage = () => {
         {lists.map((list) => (
           <List key={list.id} list={list} />
         ))}
-        {/* <Button direction='row' startIcon={<AddIcon />} sx={{minWidth:200,height:'fit-content',padding:'1rem',backgroundColor:'lightgrey'}} onClick={()=>setOpen(true)}>Add Another List</Button> */}
-        {/* <AddItem open={open} setOpen={setOpen} setListName={setListName}/> */}
-
+        
         {/* for adding new list  ------ */}
         <AddItem setItemTitle={setListName} itemName='a List' btnText='Add List'/>
 
         {/* for showing delete list popup -------- */}
-        <DeleteList open={open} setOpen={setOpen} setIsClosed={setIsClosed} />
+        <DeleteItem open={open} setOpen={setOpen} setIsClosed={setIsClosed} itemName='List'/>
 
         {/* for showing alert message on successfully creation of list ------- */}
         <AlertMessage
@@ -199,7 +196,7 @@ const ListPage = () => {
           message={"SuccessFully List Created !"}
         />
         {/* for showing alert message on successfully deletion of list ------- */}
-        {/* <AlertMessage isCompleted={isClosed} setIsCompleted={setIsClosed} message={'SuccessFully List Closed !'}/> */}
+        <AlertMessage isCompleted={isClosed} setIsCompleted={setIsClosed} message={'SuccessFully List Archived !'}/>
       </Stack>
     </Box>
   );

@@ -17,14 +17,15 @@ const AddItem = ({setItemTitle,itemName,btnText}) => {
     function handleClose(){
         // setOpen(false);
         setExpanded(false);
+        setName('');
        }
    
        function handleCreate(){
            setItemTitle(name);
-        console.log(name);
-        if(name){
-            setExpanded(false);
-            setName('');
+           console.log(name);
+           if(name){
+             setExpanded(false);
+             setName('');
         }
        }
 

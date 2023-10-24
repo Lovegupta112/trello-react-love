@@ -1,7 +1,7 @@
 import React ,{useState} from 'react';
 import {Button,Dialog,DialogTitle,DialogContent,DialogContentText,DialogActions} from '@mui/material';
 
-const DeleteList = ({open,setOpen,setIsClosed}) => {
+const DeleteItem = ({open,setOpen,setIsClosed,itemName}) => {
 
 // const [open,setOpen]=useState(false);
 
@@ -14,10 +14,10 @@ const DeleteList = ({open,setOpen,setIsClosed}) => {
     }
   return (
    <Dialog open={open} onClose={handleClose} aria-label="delete-dialog-title">
-    <DialogTitle>Archive List</DialogTitle>
+    <DialogTitle>Archive {itemName}</DialogTitle>
     <DialogContent>
         <DialogContentText>
-        Do you want to Archive this List ?
+        Do you want to Archive this {itemName} ?
         </DialogContentText>
     </DialogContent>
     <DialogActions>
@@ -28,4 +28,4 @@ const DeleteList = ({open,setOpen,setIsClosed}) => {
   )
 }
 
-export default DeleteList;
+export default DeleteItem;
