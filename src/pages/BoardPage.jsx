@@ -7,12 +7,13 @@ import AddIcon from "@mui/icons-material/Add";
 import Board from "../components/Board";
 import BoardDialogbox from "../components/Board/BoardDialogbox";
 import AlertMessage from "../components/common/AlertMessage";
+import Loader from "../components/common/Loader";
 
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiToken = import.meta.env.VITE_API_TOKEN;
 
 // for getting all boards ------
-async function getAllBoards(setBoards) {
+async function getAllBoards(setBoards,setLoader) {
   try {
     const response = await axios.get(
       `https://api.trello.com/1/members/me/boards?&key=${apiKey}&token=${apiToken}`
@@ -22,6 +23,7 @@ async function getAllBoards(setBoards) {
   } catch (error) {
     console.log("Error: ", error);
   }
+  setLoader(false);
 }
 
 // for creating board-------
@@ -46,11 +48,15 @@ const Boardpage = () => {
   const [open, setOpen] = useState(false);
   const [isCreated,setIsCreated]=useState(false);
   const [boardName, setBoardName] = useState("");
+  const [loader,setLoader]=useState(true);
+
 
   const navigate = useNavigate();
 
   useEffect(()=>{
-    getAllBoards(setBoards);
+    setTimeout(()=>{
+      getAllBoards(setBoards,setLoader);
+    },1000);
   },[]);
 
 
@@ -67,6 +73,12 @@ const Boardpage = () => {
     }
   }
 
+
+  // for loader -------
+
+  if(loader){
+    return <Loader />
+  }
 
   return (
     <Stack

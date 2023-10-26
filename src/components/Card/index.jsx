@@ -6,6 +6,7 @@ import AddItem from "../common/AddItem";
 import AlertMessage from "../common/AlertMessage";
 import DeleteItem from "../common/DeleteItem";
 import CheckListWindow from "../CheckList/CheckListWindow";
+import ProgressLoader from "../common/ProgressLoader";
 
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiToken = import.meta.env.VITE_API_TOKEN;
@@ -67,6 +68,7 @@ const index = ({ listId }) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [cardId, setCardId] = useState("");
   const [openChecklistDialog, setOpenChecklistDialog] = useState(false);
+
 
   useEffect(() => {
     getAllCards(listId, setCards);
@@ -140,6 +142,8 @@ const index = ({ listId }) => {
         setIsClosed={setIsClosed}
         itemName="Card"
       />
+
+  
 
       {/* for checklist ---------- */}
       {cardId && (

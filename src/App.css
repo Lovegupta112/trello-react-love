@@ -7,10 +7,46 @@
   --midnight-blue: #2c3e50;
   --light-grey: #eeeeeede;
 }
+
+/* for loader ------------ */
+
+.loader {
+  width: 64px;
+  height: 64px;
+  position: absolute;
+  background-image: linear-gradient(#000 16px, transparent 0),
+    linear-gradient(#ff3d00 16px, transparent 0),
+    linear-gradient(#ff3d00 16px, transparent 0),
+    linear-gradient(#000 16px, transparent 0);
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+  background-position: left top, left bottom, right top, right bottom;
+  animation: rotate 1s linear infinite;
+  z-index: 1000;
+  top: 40%;
+  left: 48%;
+}
+@keyframes rotate {
+  0% {
+    width: 64px;
+    height: 64px;
+    transform: rotate(0deg);
+  }
+  50% {
+    width: 30px;
+    height: 30px;
+    transform: rotate(180deg);
+  }
+  100% {
+    width: 64px;
+    height: 64px;
+    transform: rotate(360deg);
+  }
+}
+
 .boards-container {
   height: auto;
 }
-
 .lists-container {
   width: 100%;
   /* border:1px solid black; */
@@ -21,5 +57,5 @@
   display: none;
 }
 .progress span {
-background-color: green;
+  background-color: green;
 }

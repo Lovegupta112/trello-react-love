@@ -8,14 +8,14 @@ import AlertMessage from "../components/common/AlertMessage";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import DeleteItem from "../components/common/DeleteItem";
-// import AddIcon from "@mui/icons-material/Add";
+import Loader from "../components/common/Loader";
 
 
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiToken = import.meta.env.VITE_API_TOKEN;
 
 // for getting all lists of particular board -----------
-async function getAllLists(id, setLists, setError) {
+async function getAllLists(id, setLists, setError,setLoader) {
   try {
     const repsonse = await axios.get(
       `https://api.trello.com/1/boards/${id}/lists?key=${apiKey}&token=${apiToken}`
@@ -26,6 +26,7 @@ async function getAllLists(id, setLists, setError) {
     setError(true);
     console.log("Error: ", error);
   }
+  setLoader(false);
 }
 
 //for getting board info -----
@@ -89,12 +90,16 @@ const ListPage = () => {
   const [isClosed, setIsClosed] = useState(false);
   const [listId, setListId] = useState("");
   const [error, setError] = useState(false);
+  const [loader,setLoader]=useState(true);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    getAllLists(id, setLists, setError);
-    getBoardInfo(id, setBoardInfo);
+    setTimeout(()=>{
+      getAllLists(id, setLists, setError,setLoader);
+      getBoardInfo(id, setBoardInfo);
+    },1000)
+   
   }, []);
 
   // creating list if listname is exist ------
@@ -144,8 +149,14 @@ const ListPage = () => {
     );
   }
 
+  if(loader){
+     return <Loader />
+  }
+  
+
   const { name, prefs } = board;
 
+ 
 
   return (
     <Box
