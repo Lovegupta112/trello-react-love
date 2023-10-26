@@ -8,6 +8,7 @@ import {
   IconButton,
   Stack,
   Box,
+  Typography
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
@@ -74,7 +75,7 @@ async function deleteCheckList(
   }
 }
 
-const CheckListWindow = ({ open, setOpen, cardId }) => {
+const CheckListWindow = ({ open, setOpen, cardId ,cardName}) => {
   const [checkLists, setCheckLists] = useState([]);
   const [checkListTitle, setCheckListTitle] = useState("");
   const [openCheckListDialog, setOpenChecklistDialog] = useState(false);
@@ -107,6 +108,7 @@ const CheckListWindow = ({ open, setOpen, cardId }) => {
     );
   }
 
+  // for deleting checklist -----------
   function handleClick(e) {
     const id = e.target.closest(".checklist")?.id;
     // console.log('checklistId: ',id);
@@ -127,7 +129,10 @@ const CheckListWindow = ({ open, setOpen, cardId }) => {
       onClick={(e) => handleClick(e)}
     >
       <Stack direction="row" sx={{ justifyContent: "space-between" }}>
-        <DialogTitle>Card Name</DialogTitle>
+        <DialogTitle>
+          {/* <Typography  variant='h5' sx={{size:'20px',fontWeight:'500'}} >{cardName}</Typography> */}
+         {cardName}
+        </DialogTitle>
         <IconButton onClick={handleClose} aria-label="close">
           <CloseIcon />
         </IconButton>
@@ -136,8 +141,9 @@ const CheckListWindow = ({ open, setOpen, cardId }) => {
       {/* for showing add checklist popup ------- */}
       <Stack
         direction="row"
-        sx={{ minHeight: "10vh", justifyContent: "flex-end", padding: "1rem" }}
+        sx={{ minHeight: "10vh", justifyContent: "space-between", padding: "1rem" ,position:'relative',zIndex:'100'}}
       >
+        <Typography variant="h5">CheckLists: </Typography>
         <AddItem
           setItemTitle={setCheckListTitle}
           itemName="a CheckList"
@@ -146,20 +152,28 @@ const CheckListWindow = ({ open, setOpen, cardId }) => {
       </Stack>
 
       {/* for showing checklist - */}
+
       <DialogContent
-        sx={{ display: "flex", minHeight: "70vh", width: "900px" }}
+        sx={{ display: "flex", minHeight: "70vh", width: "900px",flexWrap:'wrap' }}
       >
         <Stack
           spacing={2}
           className="checkList-container"
+          data-cardid={cardId}
           sx={{ width: "60%" }}
         >
-          {checkLists.map((checkList) => (
+          {checkLists.length>0 ? 
+           checkLists.map((checkList) => (
             <CheckList key={checkList.id} checkListInfo={checkList} />
-          ))}
+          )): 
+           <Typography variant="h6" sx={{color:'crimson'}}>No CheckList Present !</Typography>
+           }
         </Stack>
+
       </DialogContent>
+
       <DialogActions>
+
         {/* for showing delete CheckList popup -------- */}
         <DeleteItem
           open={openCheckListDialog}
@@ -167,7 +181,6 @@ const CheckListWindow = ({ open, setOpen, cardId }) => {
           setIsClosed={setIsDeleted}
           itemName="CheckList"
         />
-
         {/* for showing alert message on successfully creation of CheckList ------- */}
         <AlertMessage
           isCompleted={isCreated}

@@ -42,7 +42,6 @@ const AddItem = ({ setItemTitle, itemName, btnText }) => {
         sx={{ boxShadow: "1px 1px 3px grey" }}
       >
         <AccordionSummary aria-controls="panel1a-content" id="panel1a-header">
-          {/* <Typography>hello</Typography> */}
           <Button
             startIcon={<AddIcon />}
             sx={{ width: 250, height: "fit-content", wordBreak: "break-word" }}

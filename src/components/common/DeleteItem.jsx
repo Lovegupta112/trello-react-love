@@ -3,8 +3,6 @@ import {Button,Dialog,DialogTitle,DialogContent,DialogContentText,DialogActions}
 
 const DeleteItem = ({open,setOpen,setIsClosed,itemName}) => {
 
-// const [open,setOpen]=useState(false);
-
     function handleClose(){
       setOpen(false);
     }

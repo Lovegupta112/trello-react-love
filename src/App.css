@@ -20,3 +20,6 @@
 .list ::-webkit-scrollbar {
   display: none;
 }
+.progress span {
+background-color: green;
+}

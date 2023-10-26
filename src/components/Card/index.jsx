@@ -147,6 +147,7 @@ const index = ({ listId }) => {
           open={openChecklistDialog}
           setOpen={setOpenChecklistDialog}
           cardId={cardId}
+          cardName={cards.find(card=>card.id===cardId).name}
         />
       )}
 
