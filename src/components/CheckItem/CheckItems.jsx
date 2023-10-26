@@ -8,13 +8,14 @@ import ProgressBar from '../common/ProgressBar';
 import {Stack} from '@mui/material';
 
 
+import { useErrorBoundary } from "react-error-boundary";
 
 
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiToken = import.meta.env.VITE_API_TOKEN;
 
 // for getting all checkItems------
-async function getAllCheckItems(checkListId,setCheckItems,setProgress,setIsChanged){
+async function getAllCheckItems(checkListId,setCheckItems,setProgress,setIsChanged,showBoundary){
   try{
    const response=await axios.get(`https://api.trello.com/1/checklists/${checkListId}/checkItems?key=${apiKey}&token=${apiToken}`);
     setCheckItems(response.data);
@@ -23,13 +24,14 @@ async function getAllCheckItems(checkListId,setCheckItems,setProgress,setIsChang
     }
   }
   catch(error){
+    showBoundary(error);
   console.log('Error: ',error);
   }
   }
 
 
 // for creating checkItem ------------
-async function createCheckItem(checkListId,checkItemTitle,setCheckItemTitle,checkItems,setCheckItems,setIsChanged){
+async function createCheckItem(checkListId,checkItemTitle,setCheckItemTitle,checkItems,setCheckItems,setIsChanged,showBoundary){
   try{
    const response= await axios.post(`https://api.trello.com/1/checklists/${checkListId}/checkItems?name=${checkItemTitle}&key=${apiKey}&token=${apiToken}`)
    setCheckItems([...checkItems,response.data]);
@@ -37,12 +39,13 @@ async function createCheckItem(checkListId,checkItemTitle,setCheckItemTitle,chec
    setIsChanged(true);
   }
   catch(error){
+    showBoundary(error);
     console.log('Error: ',error);
   }
 }
 
 // for deleting checkItem ------------
-async function deleteCheckItem(checkListId,checkItemId,setCheckItemId,checkItems,setCheckItems,setIsDeleted,setIsChanged){
+async function deleteCheckItem(checkListId,checkItemId,setCheckItemId,checkItems,setCheckItems,setIsDeleted,setIsChanged,showBoundary){
   try{
    const response= await axios.delete(`https://api.trello.com/1/checklists/${checkListId}/checkItems/${checkItemId}?key=${apiKey}&token=${apiToken}`);
    setCheckItems(checkItems.filter(checkItem=>checkItem.id!==checkItemId));
@@ -51,6 +54,7 @@ async function deleteCheckItem(checkListId,checkItemId,setCheckItemId,checkItems
    setIsChanged(true);
   }
   catch(error){
+    showBoundary(error);
     console.log('Error: ',error);
   }
 }
@@ -90,19 +94,19 @@ const index = ({checkListId}) => {
  const [progress,setProgress]=useState(0);
  const [isChanged,setIsChanged]=useState(false);
 
- 
+ const { showBoundary } = useErrorBoundary();
 
   useEffect(()=>{
-    getAllCheckItems(checkListId,setCheckItems,setProgress,setIsChanged);
+    getAllCheckItems(checkListId,setCheckItems,setProgress,setIsChanged,showBoundary);
  },[]);
 
 
  if(checkItemTitle){
-  createCheckItem(checkListId,checkItemTitle,setCheckItemTitle,checkItems,setCheckItems,setIsChanged);
+  createCheckItem(checkListId,checkItemTitle,setCheckItemTitle,checkItems,setCheckItems,setIsChanged,showBoundary);
 }
 
 if(isDeleted && checkItemId){
-  deleteCheckItem(checkListId,checkItemId,setCheckItemId,checkItems,setCheckItems,setIsDeleted,setIsChanged);
+  deleteCheckItem(checkListId,checkItemId,setCheckItemId,checkItems,setCheckItems,setIsDeleted,setIsChanged,showBoundary);
 }
 
 if(isChanged){

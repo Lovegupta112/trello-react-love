@@ -9,10 +9,12 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 
+import { useErrorBoundary } from "react-error-boundary";
+
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiToken = import.meta.env.VITE_API_TOKEN;
 
-async function updateCheckItem(cardId, checkItemId, isChecked) {
+async function updateCheckItem(cardId, checkItemId, isChecked,showBoundary) {
   try {
     await axios.put(
       `https://api.trello.com/1/cards/${cardId}/checkItem/${checkItemId}?key=${apiKey}&token=${apiToken}&state=${
@@ -20,6 +22,7 @@ async function updateCheckItem(cardId, checkItemId, isChecked) {
       }`
     );
   } catch (error) {
+    showBoundary(error);
     console.log("Error: ", error);
   }
 }
@@ -28,13 +31,17 @@ const CheckItem = ({ info, setCheckItems, setIsChanged }) => {
   const { id, name, state } = info;
 
   const [checked, setChecked] = useState(state === "incomplete" ? false : true);
+  const { showBoundary } = useErrorBoundary();
+
+
+
 
   function handleChange(event) {
     const isChecked = event.target.checked;
     const cardId = event.target.closest(".checkList-container")?.dataset.cardid;
     const checkItemId = event.target.closest(".checkItem")?.dataset.checkitem;
     setChecked(isChecked);
-    updateCheckItem(cardId, checkItemId, isChecked);
+    updateCheckItem(cardId, checkItemId, isChecked,showBoundary);
     setIsChanged(true);
     setCheckItems((checkItems) => {
       return checkItems.map((checkItem) => {

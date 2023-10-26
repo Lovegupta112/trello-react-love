@@ -17,17 +17,20 @@ import CheckList from "./CheckList";
 import AlertMessage from "../common/AlertMessage";
 import DeleteItem from "../common/DeleteItem";
 
+import { useErrorBoundary } from "react-error-boundary";
+
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiToken = import.meta.env.VITE_API_TOKEN;
 
 // get all checkLists --------
-async function getAllCheckLists(cardId, setCheckLists) {
+async function getAllCheckLists(cardId, setCheckLists,showBoundary) {
   try {
     const response = await axios.get(
       `https://api.trello.com/1/cards/${cardId}/checklists?key=${apiKey}&token=${apiToken}`
     );
     setCheckLists(response.data);
   } catch (error) {
+    showBoundary(error);
     console.log("Error: ", error);
   }
 }
@@ -39,7 +42,8 @@ async function createCheckList(
   setCheckListTitle,
   checkLists,
   setCheckLists,
-  setIsCreated
+  setIsCreated,
+  showBoundary
 ) {
   try {
     const response = await axios.post(
@@ -49,6 +53,7 @@ async function createCheckList(
     setCheckListTitle("");
     setIsCreated(true);
   } catch (error) {
+    showBoundary(error);
     console.log("Error: ", error);
   }
 }
@@ -59,7 +64,8 @@ async function deleteCheckList(
   setCheckListId,
   checkLists,
   setCheckLists,
-  setIsDeleted
+  setIsDeleted,
+  showBoundary
 ) {
   try {
     const response = await axios.delete(
@@ -71,6 +77,7 @@ async function deleteCheckList(
     setIsDeleted(true);
     setCheckListId("");
   } catch (error) {
+    showBoundary(error);
     console.log("Error: ", error);
   }
 }
@@ -83,8 +90,10 @@ const CheckListWindow = ({ open, setOpen, cardId ,cardName}) => {
   const [isDeleted, setIsDeleted] = useState(false);
   const [checkListId, setCheckListId] = useState("");
 
+  const { showBoundary } = useErrorBoundary();
+
   useEffect(() => {
-    getAllCheckLists(cardId, setCheckLists);
+    getAllCheckLists(cardId, setCheckLists,showBoundary);
   }, []);
 
   if (checkListTitle) {
@@ -94,7 +103,8 @@ const CheckListWindow = ({ open, setOpen, cardId ,cardName}) => {
       setCheckListTitle,
       checkLists,
       setCheckLists,
-      setIsCreated
+      setIsCreated,
+      showBoundary
     );
   }
 
@@ -104,7 +114,8 @@ const CheckListWindow = ({ open, setOpen, cardId ,cardName}) => {
       setCheckListId,
       checkLists,
       setCheckLists,
-      setIsDeleted
+      setIsDeleted,
+      showBoundary
     );
   }
 

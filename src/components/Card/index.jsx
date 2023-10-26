@@ -7,12 +7,13 @@ import AlertMessage from "../common/AlertMessage";
 import DeleteItem from "../common/DeleteItem";
 import CheckListWindow from "../CheckList/CheckListWindow";
 import ProgressLoader from "../common/ProgressLoader";
+import { useErrorBoundary } from "react-error-boundary";
 
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiToken = import.meta.env.VITE_API_TOKEN;
 
 //  get all Cards -------
-async function getAllCards(listId, setCards) {
+async function getAllCards(listId, setCards,showBoundary) {
   try {
     const response = await axios.get(
       `https://api.trello.com/1/lists/${listId}/cards/?key=${apiKey}&token=${apiToken}`
@@ -20,6 +21,7 @@ async function getAllCards(listId, setCards) {
     //  console.log(response.data);
     setCards(response.data);
   } catch (error) {
+    showBoundary(error);
     console.log("Error: ", error);
   }
 }
@@ -31,7 +33,8 @@ async function createCard(
   setCards,
   cardTitle,
   setCardTitle,
-  setIsCreated
+  setIsCreated,
+  showBoundary
 ) {
   try {
     const response = await axios.post(
@@ -42,12 +45,13 @@ async function createCard(
     setCardTitle("");
     setIsCreated(true);
   } catch (error) {
+    showBoundary(error);
     console.log("Error: ", error);
   }
 }
 
 // for deleting card -------------
-async function deleteCard(cardId, cards, setCards, setIsClosed, setCardId) {
+async function deleteCard(cardId, cards, setCards, setIsClosed, setCardId,showBoundary) {
   try {
     await axios.delete(
       `https://api.trello.com/1/cards/${cardId}?key=${apiKey}&token=${apiToken}`
@@ -55,7 +59,9 @@ async function deleteCard(cardId, cards, setCards, setIsClosed, setCardId) {
     setCards(cards.filter((card) => card.id !== cardId));
     setIsClosed(true);
     setCardId("");
+
   } catch (error) {
+    showBoundary(error);
     console.log("Error: ", error);
   }
 }
@@ -69,17 +75,18 @@ const index = ({ listId }) => {
   const [cardId, setCardId] = useState("");
   const [openChecklistDialog, setOpenChecklistDialog] = useState(false);
 
+  const { showBoundary } = useErrorBoundary();
 
   useEffect(() => {
-    getAllCards(listId, setCards);
+    getAllCards(listId, setCards,showBoundary);
   }, []);
 
   if (cardTitle) {
-    createCard(listId, cards, setCards, cardTitle, setCardTitle, setIsCreated);
+    createCard(listId, cards, setCards, cardTitle, setCardTitle, setIsCreated,showBoundary);
   }
 
   if (cardId && isClosed) {
-    deleteCard(cardId, cards, setCards, setIsClosed, setCardId);
+    deleteCard(cardId, cards, setCards, setIsClosed, setCardId,showBoundary);
   }
 
   function handleClick(e) {
@@ -93,6 +100,9 @@ const index = ({ listId }) => {
       setOpenChecklistDialog(true);
     }
   }
+
+
+
   return (
     <>
       <Stack

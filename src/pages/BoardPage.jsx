@@ -8,26 +8,27 @@ import Board from "../components/Board";
 import BoardDialogbox from "../components/Board/BoardDialogbox";
 import AlertMessage from "../components/common/AlertMessage";
 import Loader from "../components/common/Loader";
+import {useErrorBoundary} from 'react-error-boundary';
 
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiToken = import.meta.env.VITE_API_TOKEN;
 
 // for getting all boards ------
-async function getAllBoards(setBoards,setLoader) {
+async function getAllBoards(setBoards,setLoader,showBoundary) {
   try {
     const response = await axios.get(
       `https://api.trello.com/1/members/me/boards?&key=${apiKey}&token=${apiToken}`
     );
-    // console.log('Boards',response.data);
     setBoards(response.data);
+
   } catch (error) {
-    console.log("Error: ", error);
+    showBoundary(error);
   }
   setLoader(false);
 }
 
 // for creating board-------
-async function createBoard(boards,setBoards,boardName, setBoardName,setIsCreated) {
+async function createBoard(boards,setBoards,boardName, setBoardName,setIsCreated,showBoundary) {
   try {
     const response = await axios.post(
       `https://api.trello.com/1/boards/?name=${boardName}&key=${apiKey}&token=${apiToken}`
@@ -38,7 +39,7 @@ async function createBoard(boards,setBoards,boardName, setBoardName,setIsCreated
     setIsCreated(true);
   } catch (error) {
     console.log("Error: ", error);
-
+    showBoundary(error);
   }
 }
 
@@ -50,19 +51,21 @@ const Boardpage = () => {
   const [boardName, setBoardName] = useState("");
   const [loader,setLoader]=useState(true);
 
+ 
+  const { showBoundary } = useErrorBoundary();
 
   const navigate = useNavigate();
 
   useEffect(()=>{
     setTimeout(()=>{
-      getAllBoards(setBoards,setLoader);
+      getAllBoards(setBoards,setLoader,showBoundary);
     },1000);
   },[]);
 
 
   // for creating board if boardname is exist ---------
   if (boardName) {
-    createBoard(boards,setBoards,boardName, setBoardName,setIsCreated);
+    createBoard(boards,setBoards,boardName, setBoardName,setIsCreated,showBoundary);
   }
 
   // for opening particular board ---------
@@ -75,7 +78,6 @@ const Boardpage = () => {
 
 
   // for loader -------
-
   if(loader){
     return <Loader />
   }
