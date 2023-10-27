@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Stack, Typography, Button } from "@mui/material";
 import CheckBoxOutlinedIcon from "@mui/icons-material/CheckBoxOutlined";
-import CheckItem from "../CheckItem/CheckItems";
+import CheckItems from "../CheckItem/CheckItems";
 
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiToken = import.meta.env.VITE_API_TOKEN;
@@ -43,7 +43,7 @@ const CheckList = ({ checkListInfo }) => {
       </Stack>
 
       {/* checkItems --------- */}
-      <CheckItem checkListId={id} />
+      <CheckItems checkListId={id} />
     </Stack>
   );
 };

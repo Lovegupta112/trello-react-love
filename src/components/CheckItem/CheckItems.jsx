@@ -84,7 +84,7 @@ setIsChanged(false);
 
 
 
-const index = ({checkListId}) => {
+const CheckItems = ({checkListId}) => {
 
   const [checkItems,setCheckItems]=useState([]);
   const [checkItemTitle,setCheckItemTitle]=useState('');
@@ -160,4 +160,4 @@ function handleClick(e){
   )
 }
 
-export default index;
+export default CheckItems;
