@@ -76,6 +76,7 @@ const index = ({ listId }) => {
       return;
     }
     setIsCreated(false);
+    setIsClosed(false);
   };
 
   return (

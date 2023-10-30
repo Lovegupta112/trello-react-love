@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useReducer} from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -22,20 +22,13 @@ import { useErrorBoundary } from "react-error-boundary";
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiToken = import.meta.env.VITE_API_TOKEN;
 
-const initialState={
-    checkLists:[]
-}
 
-const reducer=(state,action)=>{
-  
-}
 
 const CheckListWindow = ({ cardId, cardName ,handleClose }) => {
   const [checkLists, setCheckLists] = useState([]);
   const [isCreated, setIsCreated] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
 
-    const [checkListState,dispatch]=useReducer(reducer,initialState);
 
   const { showBoundary } = useErrorBoundary();
 
