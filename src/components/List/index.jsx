@@ -1,8 +1,13 @@
 import { Paper, Stack, Button, Typography, TextField } from "@mui/material";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+// import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import DeleteIcon from '@mui/icons-material/Delete';
 import Card from "../Card";
 
-const index = ({ list }) => {
+const index = ({ list ,deleteList }) => {
+
+  function handleClick(listId){
+   deleteList(listId);
+  }
   return (
     <Stack
       sx={{
@@ -21,8 +26,8 @@ const index = ({ list }) => {
           sx={{ alignItems: "center", justifyContent: "space-between" }}
         >
           <Typography>{list.name}</Typography>
-          <Button className="list-setting-btn" id={list.id}>
-            <MoreHorizIcon />
+          <Button className="list-setting-btn" id={list.id} onClick={()=>handleClick(list.id)}>
+            <DeleteIcon />
           </Button>
         </Stack>
 

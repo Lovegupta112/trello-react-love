@@ -1,12 +1,16 @@
 import React ,{useState} from 'react';
 import {Button,Dialog,DialogTitle,DialogContent,DialogContentText,DialogActions} from '@mui/material';
 
-const DeleteItem = ({open,setOpen,setIsClosed,itemName}) => {
+const DeleteItem = ({itemName,deleteItem}) => {
+
+
+  const [open, setOpen] = useState(false);
 
     function handleClose(){
       setOpen(false);
     }
     function handleArchive(){
+         deleteItem()
         setIsClosed(true);
         setOpen(false);
     }

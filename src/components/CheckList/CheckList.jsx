@@ -3,11 +3,13 @@ import { Stack, Typography, Button } from "@mui/material";
 import CheckBoxOutlinedIcon from "@mui/icons-material/CheckBoxOutlined";
 import CheckItems from "../CheckItem/CheckItems";
 
-const apiKey = import.meta.env.VITE_API_KEY;
-const apiToken = import.meta.env.VITE_API_TOKEN;
 
-const CheckList = ({ checkListInfo }) => {
+const CheckList = ({ checkListInfo , deleteCheckList}) => {
   const { name, id } = checkListInfo;
+
+  function handleClick(){
+    deleteCheckList(id);
+  }
 
   return (
     <Stack
@@ -37,6 +39,7 @@ const CheckList = ({ checkListInfo }) => {
             color: "black",
             "&:hover": { backgroundColor: "crimson" },
           }}
+          onClick={handleClick}
         >
           Delete
         </Button>

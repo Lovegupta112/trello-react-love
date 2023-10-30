@@ -1,107 +1,88 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Stack, IconButton, Typography } from "@mui/material";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import { Stack, IconButton, Typography, Dialog } from "@mui/material";
+// import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddItem from "../common/AddItem";
 import AlertMessage from "../common/AlertMessage";
-import DeleteItem from "../common/DeleteItem";
+// import DeleteItem from "../common/DeleteItem";
 import CheckListWindow from "../CheckList/CheckListWindow";
-import ProgressLoader from "../common/ProgressLoader";
+// import ProgressLoader from "../common/ProgressLoader";
 import { useErrorBoundary } from "react-error-boundary";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiToken = import.meta.env.VITE_API_TOKEN;
 
-//  get all Cards -------
-async function getAllCards(listId, setCards,showBoundary) {
-  try {
-    const response = await axios.get(
-      `https://api.trello.com/1/lists/${listId}/cards/?key=${apiKey}&token=${apiToken}`
-    );
-    //  console.log(response.data);
-    setCards(response.data);
-  } catch (error) {
-    showBoundary(error);
-    console.log("Error: ", error);
-  }
-}
-
-// create cards-------------
-async function createCard(
-  listId,
-  cards,
-  setCards,
-  cardTitle,
-  setCardTitle,
-  setIsCreated,
-  showBoundary
-) {
-  try {
-    const response = await axios.post(
-      `https://api.trello.com/1/cards?idList=${listId}&key=${apiKey}&token=${apiToken}&name=${cardTitle}`
-    );
-    // console.log('Created card: ',response.data);
-    setCards([...cards, response.data]);
-    setCardTitle("");
-    setIsCreated(true);
-  } catch (error) {
-    showBoundary(error);
-    console.log("Error: ", error);
-  }
-}
-
-// for deleting card -------------
-async function deleteCard(cardId, cards, setCards, setIsClosed, setCardId,showBoundary) {
-  try {
-    await axios.delete(
-      `https://api.trello.com/1/cards/${cardId}?key=${apiKey}&token=${apiToken}`
-    );
-    setCards(cards.filter((card) => card.id !== cardId));
-    setIsClosed(true);
-    setCardId("");
-
-  } catch (error) {
-    showBoundary(error);
-    console.log("Error: ", error);
-  }
-}
-
 const index = ({ listId }) => {
   const [cards, setCards] = useState([]);
-  const [cardTitle, setCardTitle] = useState("");
   const [isCreated, setIsCreated] = useState(false);
   const [isClosed, setIsClosed] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [cardId, setCardId] = useState("");
-  const [openChecklistDialog, setOpenChecklistDialog] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const { showBoundary } = useErrorBoundary();
 
   useEffect(() => {
-    getAllCards(listId, setCards,showBoundary);
+    getAllCards();
   }, []);
 
-  if (cardTitle) {
-    createCard(listId, cards, setCards, cardTitle, setCardTitle, setIsCreated,showBoundary);
-  }
-
-  if (cardId && isClosed) {
-    deleteCard(cardId, cards, setCards, setIsClosed, setCardId,showBoundary);
-  }
-
-  function handleClick(e) {
-    const cardId = e.target.closest(".card").id;
-    if (e.target.closest(".card-delete-btn")) {
-      setCardId(cardId);
-      setOpenDeleteDialog(true);
-    } else if (e.target.closest(".card")) {
-      // console.log(e.target.closest('.card'));
-      setCardId(cardId);
-      setOpenChecklistDialog(true);
+  //  get all Cards -------
+  async function getAllCards() {
+    try {
+      const response = await axios.get(
+        `https://api.trello.com/1/lists/${listId}/cards/?key=${apiKey}&token=${apiToken}`
+      );
+      setCards(response.data);
+    } catch (error) {
+      showBoundary(error);
+      console.log("Error: ", error);
     }
   }
 
+  // create cards-------------
+  async function createCard(cardTitle) {
+    try {
+      const response = await axios.post(
+        `https://api.trello.com/1/cards?idList=${listId}&key=${apiKey}&token=${apiToken}&name=${cardTitle}`
+      );
+      setCards([...cards, response.data]);
+      setIsCreated(true);
+    } catch (error) {
+      showBoundary(error);
+      console.log("Error: ", error);
+    }
+  }
 
+  // for deleting card -------------
+  async function deleteCard(cardId) {
+    try {
+      await axios.delete(
+        `https://api.trello.com/1/cards/${cardId}?key=${apiKey}&token=${apiToken}`
+      );
+      setCards(cards.filter((card) => card.id !== cardId));
+      setIsClosed(true);
+    } catch (error) {
+      showBoundary(error);
+      console.log("Error: ", error);
+    }
+  }
+
+  // for opening popup clicking on card -------
+  function handleClick(cardId) {
+    setCardId(cardId);
+    setOpen(true);
+  }
+
+  function handleClose() {
+    setOpen(false);
+  }
+
+  const handleCloseAlert = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setIsCreated(false);
+  };
 
   return (
     <>
@@ -109,7 +90,6 @@ const index = ({ listId }) => {
         sx={{ maxHeight: "50vh", overflowY: "auto", cursor: "pointer" }}
         spacing={2}
         className="cards-container"
-        onClick={(e) => handleClick(e)}
       >
         {cards.map((card) => (
           <Stack
@@ -127,55 +107,48 @@ const index = ({ listId }) => {
               backgroundColor: "white",
             }}
           >
-            <Typography>{card.name}</Typography>
+            <Typography
+              sx={{ flexGrow: 1 }}
+              onClick={() => handleClick(card.id)}
+            >
+              {card.name}
+            </Typography>
             <IconButton
               aria-label="card-delete-btn"
               className="card-delete-btn"
+              onClick={() => deleteCard(card.id)}
             >
-              <EditOutlinedIcon />
+              <DeleteIcon fontSize="small" />
             </IconButton>
           </Stack>
         ))}
       </Stack>
 
       {/* for showing add card popup ------- */}
-      <AddItem
-        setItemTitle={setCardTitle}
-        itemName="a Card"
-        btnText="Add Card"
-      />
-
-      {/* for showing delete card popup -------- */}
-      <DeleteItem
-        open={openDeleteDialog}
-        setOpen={setOpenDeleteDialog}
-        setIsClosed={setIsClosed}
-        itemName="Card"
-      />
-
-  
+      <AddItem createItem={createCard} itemName="a Card" btnText="Add Card" />
 
       {/* for checklist ---------- */}
-      {cardId && (
-        <CheckListWindow
-          open={openChecklistDialog}
-          setOpen={setOpenChecklistDialog}
-          cardId={cardId}
-          cardName={cards.find(card=>card.id===cardId).name}
-        />
-      )}
+      {
+        <Dialog open={open} onClose={handleClose} maxWidth="lg">
+          <CheckListWindow
+            cardId={cardId}
+            cardName={cards.find((card) => card.id === cardId)?.name}
+            handleClose={handleClose}
+          />
+        </Dialog>
+      }
 
       {/* for showing alert message on successfully creation of Card ------- */}
       <AlertMessage
         isCompleted={isCreated}
-        setIsCompleted={setIsCreated}
+        handleClose={handleCloseAlert}
         message={"SuccessFully Card Created !"}
       />
 
       {/* for showing alert message on successfully deletion of card ------- */}
       <AlertMessage
         isCompleted={isClosed}
-        setIsCompleted={setIsClosed}
+        handleClose={handleCloseAlert}
         message={"SuccessFully Card archived !"}
       />
     </>

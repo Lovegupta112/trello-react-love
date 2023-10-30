@@ -1,163 +1,149 @@
-import React ,{useState,useEffect} from 'react';
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-// import {Stack} from '@mui/material';
 import AddItem from "../common/AddItem";
-import DeleteItem from '../common/DeleteItem';
-import CheckItem from './CheckItem';
-import ProgressBar from '../common/ProgressBar';
-import {Stack} from '@mui/material';
-
+import CheckItem from "./CheckItem";
+import ProgressBar from "../common/ProgressBar";
+import { Stack } from "@mui/material";
 
 import { useErrorBoundary } from "react-error-boundary";
-
 
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiToken = import.meta.env.VITE_API_TOKEN;
 
-// for getting all checkItems------
-async function getAllCheckItems(checkListId,setCheckItems,setProgress,setIsChanged,showBoundary){
-  try{
-   const response=await axios.get(`https://api.trello.com/1/checklists/${checkListId}/checkItems?key=${apiKey}&token=${apiToken}`);
-    setCheckItems(response.data);
-    if(response.data.length>0){
-      updateProgress(response.data,setProgress,setIsChanged);
+
+
+const CheckItems = ({ checkListId }) => {
+  const [checkItems, setCheckItems] = useState([]);
+  const [progress, setProgress] = useState(0);
+
+  const { showBoundary } = useErrorBoundary();
+
+  useEffect(() => {
+    getAllCheckItems();
+  }, []);
+
+  // for getting all checkItems------
+  async function getAllCheckItems() {
+    try {
+      const response = await axios.get(
+        `https://api.trello.com/1/checklists/${checkListId}/checkItems?key=${apiKey}&token=${apiToken}`
+      );
+      setCheckItems(response.data);
+      if (response.data.length > 0) {
+        updateProgress(response.data);
+      }
+    } catch (error) {
+      showBoundary(error);
+      console.log("Error: ", error);
     }
   }
-  catch(error){
-    showBoundary(error);
-  console.log('Error: ',error);
-  }
+
+  // for creating checkItem ------------
+  async function createCheckItem(checkItemTitle) {
+    try {
+      const response = await axios.post(
+        `https://api.trello.com/1/checklists/${checkListId}/checkItems?name=${checkItemTitle}&key=${apiKey}&token=${apiToken}`
+      );
+      const updatedCheckItems=[...checkItems, response.data];
+      setCheckItems(updatedCheckItems);
+      updateProgress(updatedCheckItems);
+    } catch (error) {
+      showBoundary(error);
+      console.log("Error: ", error);
+    }
   }
 
-
-// for creating checkItem ------------
-async function createCheckItem(checkListId,checkItemTitle,setCheckItemTitle,checkItems,setCheckItems,setIsChanged,showBoundary){
-  try{
-   const response= await axios.post(`https://api.trello.com/1/checklists/${checkListId}/checkItems?name=${checkItemTitle}&key=${apiKey}&token=${apiToken}`)
-   setCheckItems([...checkItems,response.data]);
-   setCheckItemTitle('');
-   setIsChanged(true);
+  // for deleting checkItem ------------
+  async function deleteCheckItem(checkItemId) {
+    try {
+      const response = await axios.delete(
+        `https://api.trello.com/1/checklists/${checkListId}/checkItems/${checkItemId}?key=${apiKey}&token=${apiToken}`
+      );
+       const updatedCheckItems=  checkItems.filter((checkItem) => checkItem.id !== checkItemId);
+      setCheckItems(updatedCheckItems);
+      updateProgress();
+    } catch (error) {
+      showBoundary(error);
+      console.log("Error: ", error);
+    }
   }
-  catch(error){
-    showBoundary(error);
-    console.log('Error: ',error);
+
+  async function updateCheckItem(cardId, checkItemId, isChecked) {
+    try {
+      const updatedCheckItems=checkItems.map((checkItem) => {
+        if (checkItem.id == checkItemId) {
+          checkItem.state = isChecked ? "complete" : "incomplete";
+        }
+        return checkItem;
+      })
+      setCheckItems(updatedCheckItems);
+      updateProgress(updatedCheckItems);
+      await axios.put(
+        `https://api.trello.com/1/cards/${cardId}/checkItem/${checkItemId}?key=${apiKey}&token=${apiToken}&state=${
+          isChecked ? "complete" : "incomplete"
+        }`
+      );
+    } catch (error) {
+      showBoundary(error);
+      console.log("Error: ", error);
+    }
   }
-}
 
-// for deleting checkItem ------------
-async function deleteCheckItem(checkListId,checkItemId,setCheckItemId,checkItems,setCheckItems,setIsDeleted,setIsChanged,showBoundary){
-  try{
-   const response= await axios.delete(`https://api.trello.com/1/checklists/${checkListId}/checkItems/${checkItemId}?key=${apiKey}&token=${apiToken}`);
-   setCheckItems(checkItems.filter(checkItem=>checkItem.id!==checkItemId));
-   setCheckItemId('');
-   setIsDeleted(false);
-   setIsChanged(true);
-  }
-  catch(error){
-    showBoundary(error);
-    console.log('Error: ',error);
-  }
-}
+ 
 
+  // for updating progressbar ---------------
 
- // for updating progressbar ---------------
-
- function updateProgress(data,setProgress,setIsChanged){
-  // console.log({isChanged});
-  const totalComplete=data.reduce((totalComplete,currentOBj)=>{
-    if(currentOBj.state==="complete"){
+function updateProgress(checkItems) {
+  const totalComplete = checkItems?.reduce((totalComplete, currentOBj) => {
+    if (currentOBj.state === "complete") {
       ++totalComplete;
     }
     return totalComplete;
-},0)
-// console.log({totalComplete});
-// console.log({dataLength:data.length})
-if(data.length===0){
-  setProgress(0);
-}else{
-  const progress=Math.floor((totalComplete*100)/data.length);
-  setProgress(progress);
-}
-
-setIsChanged(false);
- }
-
-
-
-const CheckItems = ({checkListId}) => {
-
-  const [checkItems,setCheckItems]=useState([]);
-  const [checkItemTitle,setCheckItemTitle]=useState('');
-  const [openCheckItemDialog,setOpenCheckItemDialog]=useState(false);
-  const [isDeleted, setIsDeleted] = useState(false);
- const [checkItemId,setCheckItemId]=useState('');
- const [progress,setProgress]=useState(0);
- const [isChanged,setIsChanged]=useState(false);
-
- const { showBoundary } = useErrorBoundary();
-
-  useEffect(()=>{
-    getAllCheckItems(checkListId,setCheckItems,setProgress,setIsChanged,showBoundary);
- },[]);
-
-
- if(checkItemTitle){
-  createCheckItem(checkListId,checkItemTitle,setCheckItemTitle,checkItems,setCheckItems,setIsChanged,showBoundary);
-}
-
-if(isDeleted && checkItemId){
-  deleteCheckItem(checkListId,checkItemId,setCheckItemId,checkItems,setCheckItems,setIsDeleted,setIsChanged,showBoundary);
-}
-
-if(isChanged){
-  updateProgress(checkItems,setProgress,setIsChanged);
-}
- 
-
-
-
-function handleClick(e){
-
-  // for deleting checkitem on checklist ---------
-  if(e.target.closest('.delete-checkItem-btn')){
-    const id=e.target.closest('.checkItem')?.dataset.checkitem;
-   setOpenCheckItemDialog(true);
-   setCheckItemId(id);
+  }, 0);
+  
+  if (checkItems?.length === 0) {
+    setProgress(0);
+  } else if(checkItems?.length>0) {
+    const progress = Math.floor((totalComplete * 100) / checkItems?.length);
+    setProgress(progress);
   }
 }
 
-
-
   return (
-   <>
-    <ProgressBar progress={progress}/>
+    <>
+      <ProgressBar progress={progress} />
 
-    <Stack className="checklist-checkitems" sx={{width:'100%', justifyContent: "space-between",maxHeight:'20vh',overflowX:'auto'}}   onClick={(e)=>handleClick(e)}>
-    {checkItems.map((checkitem)=>{
-      return <CheckItem info={checkitem}  key={checkitem.id} setCheckItems={setCheckItems} setIsChanged={setIsChanged} />
-    
-})}
-  </Stack>    
-
-     {/* checkItem creation box-------- */}
-     <Stack className="addCheckItem-button">
-         <AddItem  setItemTitle={setCheckItemTitle}
-          itemName="a CheckItem"
-          btnText="Add CheckItem"/> 
+      <Stack
+        className="checklist-checkitems"
+        sx={{
+          width: "100%",
+          justifyContent: "space-between",
+          maxHeight: "20vh",
+          overflowX: "auto",
+        }}
+      >
+        {checkItems.map((checkitem) => {
+          return (
+            <CheckItem
+              info={checkitem}
+              key={checkitem.id}
+              deleteCheckItem={deleteCheckItem}
+              updateCheckItem={updateCheckItem}
+            />
+          );
+        })}
       </Stack>
 
-
-     {/* for showing delete CheckItem popup -------- */}
-       <DeleteItem
-          open={openCheckItemDialog}
-          setOpen={setOpenCheckItemDialog}
-          setIsClosed={setIsDeleted}
-          itemName="CheckItem"
+      {/* checkItem creation box-------- */}
+      <Stack className="addCheckItem-button">
+        <AddItem
+          createItem={createCheckItem}
+          itemName="a CheckItem"
+          btnText="Add CheckItem"
         />
-
+      </Stack>
     </>
-        
-  )
-}
+  );
+};
 
 export default CheckItems;

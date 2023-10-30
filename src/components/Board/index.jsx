@@ -2,7 +2,6 @@ import React from "react";
 import { Card, CardContent, CardMedia, Typography } from "@mui/material";
 
 const index = ({ board }) => {
-  // console.log({ board });
   const {
     name,
     id,

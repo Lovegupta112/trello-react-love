@@ -11,7 +11,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AddIcon from "@mui/icons-material/Add";
 
-const AddItem = ({ setItemTitle, itemName, btnText }) => {
+const AddItem = ({ createItem, itemName, btnText }) => {
   const [expanded, setExpanded] = useState(false);
   const [name, setName] = useState("");
 
@@ -20,15 +20,13 @@ const AddItem = ({ setItemTitle, itemName, btnText }) => {
   };
 
   function handleClose() {
-    // setOpen(false);
     setExpanded(false);
     setName("");
   }
 
   function handleCreate() {
-    setItemTitle(name);
-    //  console.log(name);
     if (name) {
+      createItem(name);
       setExpanded(false);
       setName("");
     }

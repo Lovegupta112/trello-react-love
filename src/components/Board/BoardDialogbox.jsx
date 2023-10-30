@@ -1,16 +1,19 @@
 import {useState} from 'react';
 import {Dialog,DialogActions,DialogContent,DialogContentText,DialogTitle,Box,Button,
-TextField} from '@mui/material';
-
-const BoardDialogbox = ({open,setOpen,setBoardName}) => {
+TextField,Stack,Fab} from '@mui/material';
+import AddIcon from "@mui/icons-material/Add";
+const BoardDialogbox = ({createBoard}) => {
 
     const [name,setName]=useState('');
+    const [open, setOpen] = useState(false);
 
     const handleClose=()=>{
         setOpen(false);
     }
     const handleCreate=()=>{
-        setBoardName(name);
+      if(name){
+        createBoard(name);
+      }
         setOpen(false);
         setName('');
     }
@@ -33,6 +36,19 @@ const BoardDialogbox = ({open,setOpen,setBoardName}) => {
              <Button onClick={handleCreate}>Create</Button>
             </DialogActions>
         </Dialog>
+
+        <Fab
+        color="primary"
+        variant="extended"
+        aria-label="create board"
+        sx={{ position: "fixed", right: "20px", bottom: "20px" }}
+        onClick={() => setOpen(true)}
+      >
+        {/* for showing create board button ------ */}
+        <AddIcon sx={{ mr: 1 }} />
+        Create Board
+      </Fab>
+
     </Box>
   )
 }
