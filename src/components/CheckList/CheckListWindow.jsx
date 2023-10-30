@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useReducer} from "react";
 import {
   Dialog,
   DialogTitle,
@@ -22,20 +22,44 @@ import { useErrorBoundary } from "react-error-boundary";
 const apiKey = import.meta.env.VITE_API_KEY;
 const apiToken = import.meta.env.VITE_API_TOKEN;
 
+const ACTIONS={
+   FETCH_CHECKLISTS:'fetch_checklists',
+   CREATE_CHECKLIST:'create_checklist',
+   DELETE_CHECKLIST:'delete_checklist',
+   SET_CHECKLIST_CREATED:'set_checklist_created',
+   SET_CHECKLIST_DELETED:'set_checklist_deleted'
+}
+const initialState={
+   checkLists:[],
+   isCreated:false,
+   isDeleted:false
+}
 
-
+const reducer=(state,action)=>{
+   switch(action.type){
+     case ACTIONS.FETCH_CHECKLISTS:
+        return {...state,checkLists:action.payload};
+     case ACTIONS.CREATE_CHECKLIST:
+         return {...state,checkLists:[...state.checkLists, action.payload],isCreated:true,isDeleted:false};
+     case ACTIONS.DELETE_CHECKLIST:
+         return {...state,checkLists:state.checkLists.filter((checkList)=>checkList.id!==action.payload),isDeleted:true,isCreated:false};
+     case ACTIONS.SET_CHECKLIST_CREATED:
+        return {...state,isCreated:action.payload};
+      case ACTIONS.SET_CHECKLIST_DELETED:
+          return {...state,isDeleted:action.payload};
+     default:
+        return state;
+   }
+}
 const CheckListWindow = ({ cardId, cardName ,handleClose }) => {
-  const [checkLists, setCheckLists] = useState([]);
-  const [isCreated, setIsCreated] = useState(false);
-  const [isDeleted, setIsDeleted] = useState(false);
 
-
+  const [state,dispatch]=useReducer(reducer,initialState);
   const { showBoundary } = useErrorBoundary();
 
+  
   useEffect(() => {
     getAllCheckLists();
   }, []);
-
 
 
   // get all checkLists --------
@@ -44,7 +68,7 @@ async function getAllCheckLists() {
     const response = await axios.get(
       `https://api.trello.com/1/cards/${cardId}/checklists?key=${apiKey}&token=${apiToken}`
     );
-    setCheckLists(response.data);
+    dispatch({type:ACTIONS.FETCH_CHECKLISTS,payload:response.data});
   } catch (error) {
     showBoundary(error);
     console.log("Error: ", error);
@@ -58,8 +82,8 @@ async function createCheckList(checkListTitle) {
     const response = await axios.post(
       `https://api.trello.com/1/cards/${cardId}/checklists?key=${apiKey}&token=${apiToken}&name=${checkListTitle}`
     );
-    setCheckLists([...checkLists, response.data]);
-    setIsCreated(true);
+    
+    dispatch({type:ACTIONS.CREATE_CHECKLIST,payload:response.data});
   } catch (error) {
     showBoundary(error);
     console.log("Error: ", error);
@@ -72,10 +96,7 @@ async function deleteCheckList(checkListId) {
     const response = await axios.delete(
       `https://api.trello.com/1/checklists/${checkListId}?key=${apiKey}&token=${apiToken}`
     );
-    setCheckLists(
-      checkLists.filter((checkList) => checkList.id !== checkListId)
-    );
-    setIsDeleted(true);
+    dispatch({type:ACTIONS.DELETE_CHECKLIST,payload:checkListId});
   } catch (error) {
     showBoundary(error);
     console.log("Error: ", error);
@@ -85,8 +106,8 @@ const handleCloseAlert = (event, reason) => {
   if (reason === 'clickaway') {
     return;
   }
-  setIsCreated(false);
-  setIsDeleted(false);
+  dispatch({type:ACTIONS.SET_CHECKLIST_CREATED,payload:false});
+  dispatch({type:ACTIONS.SET_CHECKLIST_DELETED,payload:false});
 };
 
 
@@ -137,8 +158,8 @@ const handleCloseAlert = (event, reason) => {
           data-cardid={cardId}
           sx={{ width: "60%" }}
         >
-          {checkLists.length > 0 ? (
-            checkLists.map((checkList) => (
+          {state.checkLists.length > 0 ? (
+            state.checkLists.map((checkList) => (
               <CheckList key={checkList.id} checkListInfo={checkList} deleteCheckList={deleteCheckList} />
             ))
           ) : (
@@ -153,14 +174,14 @@ const handleCloseAlert = (event, reason) => {
         
         {/* for showing alert message on successfully creation of CheckList ------- */}
         <AlertMessage
-          isCompleted={isCreated}
+          isCompleted={state.isCreated}
          handleClose={handleCloseAlert}
           message={"SuccessFully CheckList Created !"}
         />
 
         {/* for showing alert message on successfully deletion of card ------- */}
         <AlertMessage
-          isCompleted={isDeleted}
+          isCompleted={state.isDeleted}
          handleClose={handleCloseAlert}
           message={"SuccessFully CheckList Deleted !"}
         />

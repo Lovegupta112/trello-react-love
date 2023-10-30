@@ -1,12 +1,9 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Stack, IconButton, Typography, Dialog } from "@mui/material";
-// import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddItem from "../common/AddItem";
 import AlertMessage from "../common/AlertMessage";
-// import DeleteItem from "../common/DeleteItem";
 import CheckListWindow from "../CheckList/CheckListWindow";
-// import ProgressLoader from "../common/ProgressLoader";
 import { useErrorBoundary } from "react-error-boundary";
 import DeleteIcon from "@mui/icons-material/Delete";
 

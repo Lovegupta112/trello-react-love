@@ -71,7 +71,6 @@ const Boardpage = () => {
     return <Loader />;
   }
 
-  console.log({isCreated});
   return (
     <Stack
       direction={{ xs: "column", sm: "row" }}
