@@ -61,7 +61,7 @@ const CheckItems = ({ checkListId }) => {
       );
        const updatedCheckItems=  checkItems.filter((checkItem) => checkItem.id !== checkItemId);
       setCheckItems(updatedCheckItems);
-      updateProgress();
+      updateProgress(updatedCheckItems);
     } catch (error) {
       showBoundary(error);
       console.log("Error: ", error);
