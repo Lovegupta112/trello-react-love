@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { Stack, Fab } from "@mui/material";
@@ -9,65 +10,41 @@ import BoardDialogbox from "../components/Board/BoardDialogbox";
 import AlertMessage from "../components/common/AlertMessage";
 import Loader from "../components/common/Loader";
 import { useErrorBoundary } from "react-error-boundary";
-
-const apiKey = import.meta.env.VITE_API_KEY;
-const apiToken = import.meta.env.VITE_API_TOKEN;
-
-
-
+import { fetchBoards, createNewBoard } from "../app/features/board/boardSlice";
 
 const Boardpage = () => {
-  const [boards, setBoards] = useState([]);
   const [isCreated, setIsCreated] = useState(false);
-  const [loader, setLoader] = useState(true);
 
   const { showBoundary } = useErrorBoundary();
 
+  const dispatch = useDispatch();
+  const { loading, boards, error } = useSelector((state) => state.board);
+
   useEffect(() => {
     setTimeout(() => {
-      getAllBoards();
+      // for getting all boards -----
+      dispatch(fetchBoards());
     }, 1000);
   }, []);
 
-  // for getting all boards ------
-  async function getAllBoards() {
-    try {
-      const response = await axios.get(
-        `https://api.trello.com/1/members/me/boards?&key=${apiKey}&token=${apiToken}`
-      );
-      setBoards(response.data);
-    } catch (error) {
-      showBoundary(error);
-    }
-    setLoader(false);
-  }
-
   // for creating board-------
   async function createBoard(boardName) {
-    try {
-      const response = await axios.post(
-        `https://api.trello.com/1/boards/?name=${boardName}&key=${apiKey}&token=${apiToken}`
-      );
-
-      setBoards([...boards, response.data]);
-      setIsCreated(true);
-    } catch (error) {
-      console.log("Error: ", error);
-      showBoundary(error);
-    }
+    dispatch(createNewBoard(boardName));
   }
 
+  if (error) {
+    showBoundary(error);
+  }
 
   const handleCloseAlert = (event, reason) => {
-    if (reason === 'clickaway') {
+    if (reason === "clickaway") {
       return;
     }
     setIsCreated(false);
   };
 
-  
-  // for loader -------
-  if (loader) {
+  // for loading -------
+  if (loading) {
     return <Loader />;
   }
 
@@ -106,12 +83,11 @@ const Boardpage = () => {
       <BoardDialogbox createBoard={createBoard} />
 
       {/* for showing alert message ------- */}
-       <AlertMessage
+      <AlertMessage
         message="SuccessFully Board Created !"
         isCompleted={isCreated}
         handleClose={handleCloseAlert}
       />
-     
     </Stack>
   );
 };
