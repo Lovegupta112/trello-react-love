@@ -28,7 +28,7 @@ const CheckListWindow = ({ cardId, cardName, handleClose }) => {
   const [isCreated, setIsCreated] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
 
-  // const state = useSelector((state) => state.checkList);
+  
   const { checkLists, error } = useSelector((state) => state.checkList);
  
   const dispatch = useDispatch();
