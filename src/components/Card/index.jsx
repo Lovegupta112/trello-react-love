@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import {useDispatch,useSelector} from 'react-redux';
+import { useDispatch, useSelector } from "react-redux";
 import { Stack, IconButton, Typography, Dialog } from "@mui/material";
 import AddItem from "../common/AddItem";
 import AlertMessage from "../common/AlertMessage";
@@ -7,53 +7,58 @@ import CheckListWindow from "../CheckList/CheckListWindow";
 import { useErrorBoundary } from "react-error-boundary";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-import {fetchCards,createNewCard,deleteCard} from '../../app/features/card/cardSlice';
-
+import {
+  fetchCards,
+  createNewCard,
+  deleteCard,
+} from "../../app/features/card/cardSlice";
 
 const index = ({ listId }) => {
-
   const [isCreated, setIsCreated] = useState(false);
   const [isClosed, setIsClosed] = useState(false);
   const [open, setOpen] = useState(false);
+  const [card, setCard] = useState({ cardId: "", cardName: "" });
 
   const { showBoundary } = useErrorBoundary();
 
-  const  {cards,error} = useSelector((state)=>state.card);
-  const dispatch=useDispatch();
-
+  const { cards, error } = useSelector((state) => state.card);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-  //  get all Cards -------
-     dispatch(fetchCards(listId));
+    //  get all Cards -------
+    dispatch(fetchCards(listId));
   }, []);
 
- 
   // create cards-------------
   async function createCard(cardTitle) {
-    dispatch(createNewCard({listId,cardTitle}));
+    dispatch(createNewCard({ listId, cardTitle }));
     setIsCreated(true);
   }
 
   // for deleting card -------------
   async function deleteSelectedCard(cardId) {
-    dispatch(deleteCard({listId,cardId}));
+    dispatch(deleteCard({ listId, cardId }));
     setIsClosed(true);
   }
 
- 
+  function handleClick(card) {
+    setOpen(true);
+    setCard({ ...card, cardId: card.id, cardName: card.name });
+  }
+
   function handleClose() {
     setOpen(false);
   }
 
   const handleCloseAlert = (event, reason) => {
-    if (reason === 'clickaway') {
+    if (reason === "clickaway") {
       return;
     }
     setIsCreated(false);
     setIsClosed(false);
   };
 
-  if(error){
+  if (error) {
     showBoundary(error);
   }
 
@@ -64,7 +69,7 @@ const index = ({ listId }) => {
         spacing={2}
         className="cards-container"
       >
-        { cards[listId]?.map((card) => (
+        {cards[listId]?.map((card) => (
           <Stack
             key={card.id}
             className="card"
@@ -80,10 +85,7 @@ const index = ({ listId }) => {
               backgroundColor: "white",
             }}
           >
-            <Typography
-              sx={{ flexGrow: 1 }}
-              onClick={() => setOpen(true)}
-            >
+            <Typography sx={{ flexGrow: 1 }} onClick={() => handleClick(card)}>
               {card.name}
             </Typography>
             <IconButton
@@ -93,26 +95,22 @@ const index = ({ listId }) => {
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
+          </Stack>
+        ))}
 
-           
-           {/* for checklist ---------- */}
-         
+        {/* for checklist ---------- */}
         <Dialog open={open} onClose={handleClose} maxWidth="lg">
           <CheckListWindow
-            cardId={card.id}
-            cardName={cards[listId].find((cardElm) => cardElm.id === card.id)?.name}
+            cardId={card.cardId}
+            cardName={card.cardName}
             handleClose={handleClose}
           />
         </Dialog>
-  
-          </Stack>
-        ))}
       </Stack>
 
       {/* for showing add card popup ------- */}
       <AddItem createItem={createCard} itemName="a Card" btnText="Add Card" />
 
-      
       {/* for showing alert message on successfully creation of Card ------- */}
       <AlertMessage
         isCompleted={isCreated}

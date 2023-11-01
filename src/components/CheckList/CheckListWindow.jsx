@@ -1,4 +1,5 @@
-import React, { useState, useEffect , useReducer} from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Dialog,
   DialogTitle,
@@ -16,108 +17,55 @@ import AddItem from "../common/AddItem";
 import CheckList from "./CheckList";
 import AlertMessage from "../common/AlertMessage";
 
-
 import { useErrorBoundary } from "react-error-boundary";
+import {
+  fetchCheckLists,
+  createNewCheckList,
+  deleteCheckList,
+} from "../../app/features/checkList/checkListSlice";
 
-const apiKey = import.meta.env.VITE_API_KEY;
-const apiToken = import.meta.env.VITE_API_TOKEN;
+const CheckListWindow = ({ cardId, cardName, handleClose }) => {
+  const [isCreated, setIsCreated] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
 
-const ACTIONS={
-   FETCH_CHECKLISTS:'fetch_checklists',
-   CREATE_CHECKLIST:'create_checklist',
-   DELETE_CHECKLIST:'delete_checklist',
-   SET_CHECKLIST_CREATED:'set_checklist_created',
-   SET_CHECKLIST_DELETED:'set_checklist_deleted'
-}
-const initialState={
-   checkLists:[],
-   isCreated:false,
-   isDeleted:false
-}
-
-const reducer=(state,action)=>{
-   switch(action.type){
-     case ACTIONS.FETCH_CHECKLISTS:
-        return {...state,checkLists:action.payload};
-     case ACTIONS.CREATE_CHECKLIST:
-         return {...state,checkLists:[...state.checkLists, action.payload],isCreated:true,isDeleted:false};
-     case ACTIONS.DELETE_CHECKLIST:
-         return {...state,checkLists:state.checkLists.filter((checkList)=>checkList.id!==action.payload),isDeleted:true,isCreated:false};
-     case ACTIONS.SET_CHECKLIST_CREATED:
-        return {...state,isCreated:action.payload};
-      case ACTIONS.SET_CHECKLIST_DELETED:
-          return {...state,isDeleted:action.payload};
-     default:
-        return state;
-   }
-}
-const CheckListWindow = ({ cardId, cardName ,handleClose }) => {
-
-  const [state,dispatch]=useReducer(reducer,initialState);
+  // const state = useSelector((state) => state.checkList);
+  const { checkLists, error } = useSelector((state) => state.checkList);
+ 
+  const dispatch = useDispatch();
   const { showBoundary } = useErrorBoundary();
 
-  
   useEffect(() => {
-    getAllCheckLists();
+    // get all checkLists --------
+      dispatch(fetchCheckLists(cardId));
   }, []);
 
+  // create new checkList------
+  function createCheckList(checkListTitle) {
+    dispatch(createNewCheckList({cardId, checkListTitle}));
+    setIsCreated(true);
+  }
 
-  // get all checkLists --------
-async function getAllCheckLists() {
-  try {
-    const response = await axios.get(
-      `https://api.trello.com/1/cards/${cardId}/checklists?key=${apiKey}&token=${apiToken}`
-    );
-    dispatch({type:ACTIONS.FETCH_CHECKLISTS,payload:response.data});
-  } catch (error) {
+  // delete checkList -----------
+  function deleteSelectedCheckList(checkListId) {
+    dispatch(deleteCheckList(checkListId));
+    setIsDeleted(true);
+  }
+  const handleCloseAlert = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setIsCreated(false);
+    setIsDeleted(false);
+  };
+
+  if (error) {
     showBoundary(error);
-    console.log("Error: ", error);
   }
-}
-
-
-// create new checkList------
-async function createCheckList(checkListTitle) {
-  try {
-    const response = await axios.post(
-      `https://api.trello.com/1/cards/${cardId}/checklists?key=${apiKey}&token=${apiToken}&name=${checkListTitle}`
-    );
-    
-    dispatch({type:ACTIONS.CREATE_CHECKLIST,payload:response.data});
-  } catch (error) {
-    showBoundary(error);
-    console.log("Error: ", error);
-  }
-}
-
-// delete checkList -----------
-async function deleteCheckList(checkListId) {
-  try {
-    const response = await axios.delete(
-      `https://api.trello.com/1/checklists/${checkListId}?key=${apiKey}&token=${apiToken}`
-    );
-    dispatch({type:ACTIONS.DELETE_CHECKLIST,payload:checkListId});
-  } catch (error) {
-    showBoundary(error);
-    console.log("Error: ", error);
-  }
-}
-const handleCloseAlert = (event, reason) => {
-  if (reason === 'clickaway') {
-    return;
-  }
-  dispatch({type:ACTIONS.SET_CHECKLIST_CREATED,payload:false});
-  dispatch({type:ACTIONS.SET_CHECKLIST_DELETED,payload:false});
-};
-
 
   return (
     <>
       <Stack direction="row" sx={{ justifyContent: "space-between" }}>
-        <DialogTitle>
-          {/* <Typography  variant='h5' sx={{size:'20px',fontWeight:'500'}} >{cardName}</Typography> */}
-          {cardName}
-        </DialogTitle>
+        <DialogTitle>{cardName}</DialogTitle>
         <IconButton onClick={handleClose} aria-label="close">
           <CloseIcon />
         </IconButton>
@@ -158,9 +106,13 @@ const handleCloseAlert = (event, reason) => {
           data-cardid={cardId}
           sx={{ width: "60%" }}
         >
-          {state.checkLists.length > 0 ? (
-            state.checkLists.map((checkList) => (
-              <CheckList key={checkList.id} checkListInfo={checkList} deleteCheckList={deleteCheckList} />
+          {checkLists?.length > 0 ? (
+            checkLists?.map((checkList) => (
+              <CheckList
+                key={checkList.id}
+                checkListInfo={checkList}
+                deleteCheckList={deleteSelectedCheckList}
+              />
             ))
           ) : (
             <Typography variant="h6" sx={{ color: "crimson" }}>
@@ -171,18 +123,17 @@ const handleCloseAlert = (event, reason) => {
       </DialogContent>
 
       <DialogActions>
-        
         {/* for showing alert message on successfully creation of CheckList ------- */}
         <AlertMessage
-          isCompleted={state.isCreated}
-         handleClose={handleCloseAlert}
+          isCompleted={isCreated}
+          handleClose={handleCloseAlert}
           message={"SuccessFully CheckList Created !"}
         />
 
         {/* for showing alert message on successfully deletion of card ------- */}
         <AlertMessage
-          isCompleted={state.isDeleted}
-         handleClose={handleCloseAlert}
+          isCompleted={isDeleted}
+          handleClose={handleCloseAlert}
           message={"SuccessFully CheckList Deleted !"}
         />
       </DialogActions>
