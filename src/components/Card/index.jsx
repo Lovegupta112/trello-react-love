@@ -18,6 +18,7 @@ const index = ({ listId }) => {
   const [isCreated, setIsCreated] = useState(false);
   const [isClosed, setIsClosed] = useState(false);
   const [open, setOpen] = useState(false);
+  const [card, setCard] = useState({ cardId: "", cardName: "" });
 
   const { showBoundary } = useErrorBoundary();
 
@@ -66,6 +67,11 @@ const index = ({ listId }) => {
     }
   }
 
+  function handleClick(card) {
+    setOpen(true);
+    setCard({ ...card, cardId: card.id, cardName: card.name });
+  }
+
  
   function handleClose() {
     setOpen(false);
@@ -104,7 +110,7 @@ const index = ({ listId }) => {
           >
             <Typography
               sx={{ flexGrow: 1 }}
-              onClick={() => setOpen(true)}
+              onClick={() => handleClick(card)}
             >
               {card.name}
             </Typography>
@@ -115,20 +121,20 @@ const index = ({ listId }) => {
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
-
-           
-           {/* for checklist ---------- */}
-         
-        <Dialog open={open} onClose={handleClose} maxWidth="lg">
-          <CheckListWindow
-            cardId={card.id}
-            cardName={cards.find((cardElm) => cardElm.id === card.id)?.name}
-            handleClose={handleClose}
-          />
-        </Dialog>
   
           </Stack>
         ))}
+
+         
+           {/* for checklist ---------- */}
+         
+           <Dialog open={open} onClose={handleClose} maxWidth="lg">
+          <CheckListWindow
+            cardId={card.cardId}
+            cardName={card.cardName}
+            handleClose={handleClose}
+          />
+        </Dialog>
       </Stack>
 
       {/* for showing add card popup ------- */}
