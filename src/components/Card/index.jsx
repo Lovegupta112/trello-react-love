@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import {useDispatch,useSelector} from 'react-redux';
 import { Stack, IconButton, Typography, Dialog } from "@mui/material";
 import AddItem from "../common/AddItem";
 import AlertMessage from "../common/AlertMessage";
@@ -7,60 +7,37 @@ import CheckListWindow from "../CheckList/CheckListWindow";
 import { useErrorBoundary } from "react-error-boundary";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-const apiKey = import.meta.env.VITE_API_KEY;
-const apiToken = import.meta.env.VITE_API_TOKEN;
+import {fetchCards,createNewCard,deleteCard} from '../../app/features/card/cardSlice';
+
 
 const index = ({ listId }) => {
-  const [cards, setCards] = useState([]);
+
   const [isCreated, setIsCreated] = useState(false);
   const [isClosed, setIsClosed] = useState(false);
   const [open, setOpen] = useState(false);
 
   const { showBoundary } = useErrorBoundary();
 
+  const  {cards,error} = useSelector((state)=>state.card);
+  const dispatch=useDispatch();
+
+
   useEffect(() => {
-    getAllCards();
+  //  get all Cards -------
+     dispatch(fetchCards(listId));
   }, []);
 
-  //  get all Cards -------
-  async function getAllCards() {
-    try {
-      const response = await axios.get(
-        `https://api.trello.com/1/lists/${listId}/cards/?key=${apiKey}&token=${apiToken}`
-      );
-      setCards(response.data);
-    } catch (error) {
-      showBoundary(error);
-      console.log("Error: ", error);
-    }
-  }
-
+ 
   // create cards-------------
   async function createCard(cardTitle) {
-    try {
-      const response = await axios.post(
-        `https://api.trello.com/1/cards?idList=${listId}&key=${apiKey}&token=${apiToken}&name=${cardTitle}`
-      );
-      setCards([...cards, response.data]);
-      setIsCreated(true);
-    } catch (error) {
-      showBoundary(error);
-      console.log("Error: ", error);
-    }
+    dispatch(createNewCard({listId,cardTitle}));
+    setIsCreated(true);
   }
 
   // for deleting card -------------
-  async function deleteCard(cardId) {
-    try {
-      await axios.delete(
-        `https://api.trello.com/1/cards/${cardId}?key=${apiKey}&token=${apiToken}`
-      );
-      setCards(cards.filter((card) => card.id !== cardId));
-      setIsClosed(true);
-    } catch (error) {
-      showBoundary(error);
-      console.log("Error: ", error);
-    }
+  async function deleteSelectedCard(cardId) {
+    dispatch(deleteCard({listId,cardId}));
+    setIsClosed(true);
   }
 
  
@@ -76,6 +53,10 @@ const index = ({ listId }) => {
     setIsClosed(false);
   };
 
+  if(error){
+    showBoundary(error);
+  }
+
   return (
     <>
       <Stack
@@ -83,7 +64,7 @@ const index = ({ listId }) => {
         spacing={2}
         className="cards-container"
       >
-        {cards.map((card) => (
+        { cards[listId]?.map((card) => (
           <Stack
             key={card.id}
             className="card"
@@ -108,7 +89,7 @@ const index = ({ listId }) => {
             <IconButton
               aria-label="card-delete-btn"
               className="card-delete-btn"
-              onClick={() => deleteCard(card.id)}
+              onClick={() => deleteSelectedCard(card.id)}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
@@ -119,7 +100,7 @@ const index = ({ listId }) => {
         <Dialog open={open} onClose={handleClose} maxWidth="lg">
           <CheckListWindow
             cardId={card.id}
-            cardName={cards.find((cardElm) => cardElm.id === card.id)?.name}
+            cardName={cards[listId].find((cardElm) => cardElm.id === card.id)?.name}
             handleClose={handleClose}
           />
         </Dialog>
@@ -132,7 +113,6 @@ const index = ({ listId }) => {
       <AddItem createItem={createCard} itemName="a Card" btnText="Add Card" />
 
       
-
       {/* for showing alert message on successfully creation of Card ------- */}
       <AlertMessage
         isCompleted={isCreated}

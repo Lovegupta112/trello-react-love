@@ -33,10 +33,8 @@ const ListPage = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    setTimeout(() => {
       dispatch(fetchLists(id));
       getBoardInfo();
-    }, 1000);
   }, []);
 
   //for getting board info -----

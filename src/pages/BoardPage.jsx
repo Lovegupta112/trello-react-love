@@ -21,10 +21,8 @@ const Boardpage = () => {
   const { loading, boards, error } = useSelector((state) => state.board);
 
   useEffect(() => {
-    setTimeout(() => {
       // for getting all boards -----
       dispatch(fetchBoards());
-    }, 1000);
   }, []);
 
   // for creating board-------
